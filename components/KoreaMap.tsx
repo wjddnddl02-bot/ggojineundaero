@@ -29,27 +29,27 @@ const SVG_ID_TO_REGION: Record<string, RegionId> = Object.fromEntries(
   Object.entries(REGION_TO_SVG_ID).map(([regionId, svgId]) => [svgId, regionId as RegionId])
 );
 
-// Neighbouring provinces get a different hue from this muted palette so every
-// border reads clearly at a glance, like a real reference map rather than a
-// single-tone silhouette.
+// Every one of the 17 regions gets its own hue (not shared with any other
+// region) so the map reads unambiguously like a real administrative map,
+// instead of a handful of tones repeated across the country.
 const REGION_FILL: Record<RegionId, string> = {
-  seoul: "#E7B79A",
-  gangwon: "#E7B79A",
-  daejeon: "#E7B79A",
-  jeonnam: "#E7B79A",
-  ulsan: "#E7B79A",
-  jeju: "#E7B79A",
-  incheon: "#AEB6CC",
-  chungbuk: "#AEB6CC",
-  gwangju: "#AEB6CC",
-  gyeongnam: "#AEB6CC",
-  gyeonggi: "#B4C69B",
-  jeonbuk: "#B4C69B",
-  daegu: "#B4C69B",
-  chungnam: "#DCC583",
-  gyeongbuk: "#DCC583",
-  busan: "#DCC583",
-  sejong: "#C6A3B8",
+  seoul: "hsl(0, 55%, 80%)",
+  gyeonggi: "hsl(148, 35%, 76%)",
+  incheon: "hsl(296, 38%, 82%)",
+  gangwon: "hsl(85, 38%, 74%)",
+  gyeongbuk: "hsl(233, 40%, 82%)",
+  daegu: "hsl(21, 50%, 76%)",
+  ulsan: "hsl(169, 40%, 74%)",
+  busan: "hsl(318, 40%, 82%)",
+  gyeongnam: "hsl(106, 32%, 74%)",
+  jeonnam: "hsl(254, 42%, 82%)",
+  gwangju: "hsl(42, 48%, 76%)",
+  jeonbuk: "hsl(191, 42%, 76%)",
+  chungnam: "hsl(339, 45%, 80%)",
+  sejong: "hsl(127, 30%, 74%)",
+  daejeon: "hsl(275, 40%, 82%)",
+  chungbuk: "hsl(64, 40%, 68%)",
+  jeju: "hsl(212, 42%, 80%)",
 };
 
 const [VIEWBOX_WIDTH, VIEWBOX_HEIGHT] = southKorea.viewBox
