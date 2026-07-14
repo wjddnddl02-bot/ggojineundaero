@@ -20,6 +20,8 @@ export type RegionId =
 export interface Region {
   id: RegionId;
   label: string;
+  /** short form used for on-map labels, e.g. "경기" instead of "경기도" */
+  shortLabel: string;
   /** normalized anchor position within the map container, 0 to 1 */
   x: number;
   y: number;
