@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { X } from "lucide-react";
 import SharePreviewModal from "@/components/SharePreviewModal";
 import { trackEvent } from "@/lib/utils";
 import type { ThrowResult } from "@/types/destination";
@@ -10,9 +11,10 @@ interface ResultSheetProps {
   result: ThrowResult;
   rerollAvailable: boolean;
   onReroll: () => void;
+  onClose: () => void;
 }
 
-export default function ResultSheet({ result, rerollAvailable, onReroll }: ResultSheetProps) {
+export default function ResultSheet({ result, rerollAvailable, onReroll, onClose }: ResultSheetProps) {
   const [shareOpen, setShareOpen] = useState(false);
 
   function openShare() {
@@ -32,6 +34,15 @@ export default function ResultSheet({ result, rerollAvailable, onReroll }: Resul
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="relative z-30 w-full rounded-t-[28px] bg-[var(--color-bg)] px-6 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-6 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]"
     >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="결과 화면 닫기"
+        className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-[var(--color-text)]/50 hover:bg-black/5"
+      >
+        <X size={20} />
+      </button>
+
       <div aria-live="polite" className="text-center">
         <p className="text-sm font-medium text-[var(--color-text)]/60">
           당신의 이번 여행지는

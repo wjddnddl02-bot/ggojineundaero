@@ -74,6 +74,7 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     sharedDestination ? null : getStoredResult()
   );
   const [rerollAvailable, setRerollAvailable] = useState(() => !hasUsedReroll());
+  const [sheetOpen, setSheetOpen] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showThrowFail, setShowThrowFail] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -92,6 +93,7 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     setRerollAvailable(!hasUsedReroll());
     if (stored) {
       setResult(stored);
+      setSheetOpen(true);
       setPhase("result");
     } else {
       setPhase("ready");
@@ -130,6 +132,7 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
 
   const handleRevealComplete = useCallback(() => {
     setPhase("result");
+    setSheetOpen(true);
     setResult((current) => {
       if (current) {
         setStoredResult(current);
@@ -273,10 +276,31 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
       </div>
 
       <AnimatePresence>
-        {phase === "result" && result && (
+        {phase === "result" && result && sheetOpen && (
           <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[480px]">
-            <ResultSheet result={result} rerollAvailable={rerollAvailable} onReroll={handleReroll} />
+            <ResultSheet
+              result={result}
+              rerollAvailable={rerollAvailable}
+              onReroll={handleReroll}
+              onClose={() => setSheetOpen(false)}
+            />
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {phase === "result" && result && !sheetOpen && (
+          <motion.button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+18px)] z-30 mx-auto min-h-11 w-fit max-w-[calc(100%-3rem)] rounded-full bg-[var(--color-text)] px-6 py-3 text-sm font-semibold text-[var(--color-bg)] shadow-lg active:scale-[0.98]"
+          >
+            {result.destination.city} 결과 다시 보기
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
