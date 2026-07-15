@@ -1,33 +1,10 @@
 "use client";
 
-import southKorea from "@svg-maps/south-korea";
+import { mapUnits, MAP_VIEWBOX_WIDTH, MAP_VIEWBOX_HEIGHT } from "@/data/mapUnits";
+import { provinceOutlines } from "@/data/mapProvinces";
 import { regions } from "@/data/regions";
 import type { RegionId } from "@/types/destination";
 import { cx } from "@/lib/utils";
-
-const REGION_TO_SVG_ID: Record<RegionId, string> = {
-  seoul: "seoul",
-  incheon: "incheon",
-  gyeonggi: "gyeonggi",
-  gangwon: "gangwon",
-  sejong: "sejong",
-  daejeon: "daejeon",
-  chungbuk: "north-chungcheong",
-  chungnam: "south-chungcheong",
-  daegu: "daegu",
-  gyeongbuk: "north-gyeongsang",
-  ulsan: "ulsan",
-  busan: "busan",
-  gyeongnam: "south-gyeongsang",
-  jeonbuk: "north-jeolla",
-  gwangju: "gwangju",
-  jeonnam: "south-jeolla",
-  jeju: "jeju",
-};
-
-const SVG_ID_TO_REGION: Record<string, RegionId> = Object.fromEntries(
-  Object.entries(REGION_TO_SVG_ID).map(([regionId, svgId]) => [svgId, regionId as RegionId])
-);
 
 // Every one of the 17 regions gets its own hue (not shared with any other
 // region) so the map reads unambiguously like a real administrative map,
@@ -52,62 +29,66 @@ const REGION_FILL: Record<RegionId, string> = {
   jeju: "hsl(212, 42%, 80%)",
 };
 
-const [VIEWBOX_WIDTH, VIEWBOX_HEIGHT] = southKorea.viewBox
-  .split(" ")
-  .slice(2)
-  .map(Number);
-
 interface KoreaMapProps {
   highlightedRegionId?: RegionId | null;
+  /** exact municipality name (Destination.city) to spotlight, e.g. "속초시" */
+  highlightedCity?: string | null;
   className?: string;
 }
 
-interface MapLocation {
-  id: string;
-  name: string;
-  path: string;
-}
-
-export default function KoreaMap({ highlightedRegionId, className }: KoreaMapProps) {
-  const highlightedSvgId = highlightedRegionId
-    ? REGION_TO_SVG_ID[highlightedRegionId]
-    : null;
-  const locations = southKorea.locations as unknown as MapLocation[];
-
+export default function KoreaMap({
+  highlightedRegionId,
+  highlightedCity,
+  className,
+}: KoreaMapProps) {
   return (
     <svg
-      viewBox={southKorea.viewBox}
+      viewBox={`0 0 ${MAP_VIEWBOX_WIDTH} ${MAP_VIEWBOX_HEIGHT}`}
       className={cx("h-full w-full overflow-visible", className)}
       role="img"
       aria-label="대한민국 지도"
     >
-      {locations.map((location) => {
-        const isHighlighted = location.id === highlightedSvgId;
-        const regionId = SVG_ID_TO_REGION[location.id];
-        return (
-          <path
-            key={location.id}
-            data-region={regionId}
-            d={location.path}
-            style={isHighlighted ? undefined : { fill: REGION_FILL[regionId] }}
-            className={cx(
-              "transition-[filter,fill] duration-300 ease-out",
-              isHighlighted
-                ? "fill-[var(--color-map-selected)]"
-                : "hover:brightness-105"
-            )}
-            stroke="var(--color-map-border)"
-            strokeWidth={1.6}
-            strokeLinejoin="round"
-          />
-        );
-      })}
+      <g>
+        {mapUnits.map((unit) => {
+          const isHighlighted =
+            highlightedRegionId === unit.regionId && highlightedCity === unit.name;
+          const fill = isHighlighted ? "var(--color-map-selected)" : REGION_FILL[unit.regionId];
+          return (
+            <path
+              key={`${unit.regionId}-${unit.name}`}
+              data-region={unit.regionId}
+              data-city={unit.name}
+              d={unit.d}
+              style={{ fill }}
+              className={cx(
+                "transition-[filter,fill] duration-300 ease-out",
+                !isHighlighted && "hover:brightness-105"
+              )}
+              stroke="var(--color-map-unit-border)"
+              strokeWidth={0.6}
+              strokeLinejoin="round"
+            />
+          );
+        })}
+      </g>
+
+      <g
+        fill="none"
+        stroke="var(--color-map-border)"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+        className="pointer-events-none"
+      >
+        {provinceOutlines.map((province) => (
+          <path key={province.regionId} d={province.d} />
+        ))}
+      </g>
 
       {regions.map((region) => (
         <text
           key={region.id}
-          x={region.x * VIEWBOX_WIDTH}
-          y={region.y * VIEWBOX_HEIGHT}
+          x={region.x * MAP_VIEWBOX_WIDTH}
+          y={region.y * MAP_VIEWBOX_HEIGHT}
           textAnchor="middle"
           dominantBaseline="middle"
           className="pointer-events-none select-none"

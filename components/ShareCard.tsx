@@ -29,7 +29,11 @@ export default function ShareCard({ result }: ShareCardProps) {
       </div>
 
       <div className="relative mt-16 flex h-[820px] w-full items-center justify-center">
-        <KoreaMap highlightedRegionId={result.destination.regionId} className="h-full w-full" />
+        <KoreaMap
+          highlightedRegionId={result.destination.regionId}
+          highlightedCity={result.destination.city}
+          className="h-full w-full"
+        />
         <div
           className="absolute h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-pin)] shadow-lg"
           style={{ left: `${result.landingX * 100}%`, top: `${result.landingY * 100}%` }}

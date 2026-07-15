@@ -171,10 +171,9 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
   }
 
   const isMapDimmed = phase === "dragging" || phase === "flying";
-  const highlightedRegionId =
-    phase === "landed" || phase === "revealing" || phase === "result"
-      ? result?.destination.regionId ?? null
-      : null;
+  const isRevealed = phase === "landed" || phase === "revealing" || phase === "result";
+  const highlightedRegionId = isRevealed ? result?.destination.regionId ?? null : null;
+  const highlightedCity = isRevealed ? result?.destination.city ?? null : null;
 
   return (
     <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-[var(--color-bg)]">
@@ -207,14 +206,14 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
       <div className="relative mx-6 mt-2 flex flex-1 items-center justify-center">
         <motion.div
           ref={mapContainerRef}
-          className="relative aspect-[524/631] w-full max-w-[360px]"
+          className="relative aspect-[520/553] w-full max-w-[360px]"
           animate={{
             scale: isMapDimmed ? 0.92 : 1,
             opacity: isMapDimmed ? 0.55 : 1,
           }}
           transition={{ duration: reducedMotion ? 0.1 : 0.4 }}
         >
-          <KoreaMap highlightedRegionId={highlightedRegionId} />
+          <KoreaMap highlightedRegionId={highlightedRegionId} highlightedCity={highlightedCity} />
           {result && (
             <ImpactEffect
               x={result.landingX}

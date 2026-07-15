@@ -7,7 +7,8 @@
   --color-accent: #f0442e;
   --color-accent-soft: #f5a623;
   --color-map-base: #ddd4c3;
-  --color-map-border: #9c8e73;
+  --color-map-border: #8a7c62;
+  --color-map-unit-border: rgba(138, 124, 98, 0.45);
   --color-map-selected: #f4b7a9;
   --color-map-hover: #e7ddc9;
 }
