@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import KoreaMap from "@/components/KoreaMap";
 import ThrowablePin from "@/components/ThrowablePin";
+import IntroScreen from "@/components/IntroScreen";
 import IntroGuide from "@/components/IntroGuide";
 import ImpactEffect from "@/components/ImpactEffect";
 import RevealSequence from "@/components/RevealSequence";
@@ -57,7 +58,7 @@ function SharedIntro({
         onClick={onStart}
         className="mt-6 min-h-11 rounded-full bg-[var(--color-accent)] px-8 py-4 text-lg font-bold text-white shadow-md active:scale-[0.98]"
       >
-        나도 핀 던지기
+        나도 다트 던지기
       </button>
     </div>
   );
@@ -74,6 +75,9 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     sharedDestination ? null : getStoredResult()
   );
   const [rerollAvailable, setRerollAvailable] = useState(() => !hasUsedReroll());
+  const [introSeen, setIntroSeen] = useState(
+    () => Boolean(sharedDestination) || Boolean(getStoredResult())
+  );
   const [sheetOpen, setSheetOpen] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showThrowFail, setShowThrowFail] = useState(false);
@@ -170,6 +174,12 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     return <SharedIntro destination={sharedDestination} onStart={handleStartOwn} />;
   }
 
+  if (!introSeen) {
+    return (
+      <IntroScreen onStart={() => setIntroSeen(true)} reducedMotion={reducedMotion} />
+    );
+  }
+
   const isMapDimmed = phase === "dragging" || phase === "flying";
   const isRevealed = phase === "landed" || phase === "revealing" || phase === "result";
   const highlightedRegionId = isRevealed ? result?.destination.regionId ?? null : null;
@@ -196,7 +206,7 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
                 운명에 맡겨볼까요?
               </h1>
               <p className="mt-2 text-sm text-[var(--color-text)]/60">
-                핀을 잡고 대한민국 어딘가로 던져보세요.
+                다트를 잡고 대한민국 어딘가로 던져보세요.
               </p>
             </motion.div>
           )}

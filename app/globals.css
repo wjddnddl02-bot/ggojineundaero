@@ -11,6 +11,10 @@
   --color-map-unit-border: rgba(138, 124, 98, 0.45);
   --color-map-selected: #f4b7a9;
   --color-map-hover: #e7ddc9;
+  --color-mystery-bg: #14100c;
+  --color-mystery-bg-soft: #1e1712;
+  --color-mystery-text: #f1e9d8;
+  --color-mystery-glow: rgba(240, 68, 46, 0.35);
 }
 
 @theme inline {

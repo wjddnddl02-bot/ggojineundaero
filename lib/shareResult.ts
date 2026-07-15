@@ -13,7 +13,7 @@ export async function renderNodeToPngBlob(node: HTMLElement): Promise<Blob> {
 }
 
 export function buildShareText(regionAndCity: string): string {
-  return `내 랜덤 여행지는 ${regionAndCity}!\n너도 대한민국 지도에 핀을 던져봐.`;
+  return `내 랜덤 여행지는 ${regionAndCity}!\n너도 대한민국 지도에 다트를 던져봐.`;
 }
 
 export type ShareOutcome = "shared" | "cancelled" | "downloaded" | "error";

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import type { RefObject } from "react";
 import { motion, useMotionValue, animate, type PanInfo } from "framer-motion";
+import DartShape from "@/components/DartShape";
 import {
   createThrowVector,
   isValidThrow,
@@ -19,25 +20,6 @@ interface ThrowablePinProps {
   onInvalidThrow: () => void;
   onValidThrow: (aimed: NormalizedLanding) => NormalizedLanding;
   onFlightComplete: () => void;
-}
-
-function PinShape({ size }: { size: number }) {
-  return (
-    <svg
-      width={size}
-      height={size * 1.25}
-      viewBox="0 0 56 70"
-      fill="none"
-      aria-hidden
-    >
-      <ellipse cx="28" cy="64" rx="12" ry="4" fill="black" opacity="0.15" />
-      <path
-        d="M28 2C14.7 2 4 12.7 4 26c0 17.6 20.6 38.4 22.9 40.7a1.5 1.5 0 0 0 2.2 0C31.4 64.4 52 43.6 52 26 52 12.7 41.3 2 28 2Z"
-        fill="var(--color-pin)"
-      />
-      <circle cx="28" cy="26" r="10" fill="white" />
-    </svg>
-  );
 }
 
 export default function ThrowablePin({
@@ -134,9 +116,9 @@ export default function ThrowablePin({
       whileTap={interactive ? { scale: 1.12 } : undefined}
       role="button"
       tabIndex={interactive ? 0 : -1}
-      aria-label="핀을 잡아 위로 던지기"
+      aria-label="다트를 잡아 위로 던지기"
     >
-      <PinShape size={pinSize} />
+      <DartShape size={pinSize} />
     </motion.div>
   );
 }
