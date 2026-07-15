@@ -8,9 +8,11 @@ export interface ThrowVector {
   speed: number;
 }
 
-const MIN_UPWARD_DISTANCE = 40;
-const MIN_TOTAL_DISTANCE = 60;
-const MIN_UPWARD_VELOCITY = 250;
+export const MIN_UPWARD_DISTANCE = 40;
+export const MIN_TOTAL_DISTANCE = 60;
+export const MIN_UPWARD_VELOCITY = 250;
+/** drag distance treated as a "full" gauge for the aim UI */
+export const MAX_GAUGE_DISTANCE = 260;
 
 export function createThrowVector(
   offset: { x: number; y: number },
