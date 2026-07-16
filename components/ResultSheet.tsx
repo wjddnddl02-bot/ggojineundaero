@@ -88,10 +88,10 @@ export default function ResultSheet({ result, rerollAvailable, onReroll, onClose
               onClick={handleReroll}
               className="min-h-11 px-3 text-sm font-semibold text-[var(--color-text)]/70 underline underline-offset-4"
             >
-              다시 던지기
+              다시 뛰어내리기
             </button>
             <p className="text-xs text-[var(--color-text)]/50">
-              다시 던질 기회 1번 남음
+              다시 뛰어내릴 기회 1번 남음
             </p>
           </div>
         ) : (

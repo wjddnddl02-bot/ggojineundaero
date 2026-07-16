@@ -43,7 +43,7 @@ export default function RevealSequence({
             exit={{ opacity: 0 }}
             className="rounded-full bg-[var(--color-text)]/85 px-5 py-2 text-base font-semibold text-[var(--color-bg)]"
           >
-            다트가 꽂혔습니다
+            낙하산이 착지했습니다
           </motion.p>
         )}
         {step === "teaser" && (

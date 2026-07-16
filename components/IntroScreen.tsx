@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import KoreaMap from "@/components/KoreaMap";
-import DartShape from "@/components/DartShape";
+import AirplaneShape from "@/components/AirplaneShape";
 import { SERVICE_NAME } from "@/lib/constants";
 
 interface IntroScreenProps {
@@ -45,7 +45,7 @@ export default function IntroScreen({ onStart, reducedMotion }: IntroScreenProps
               숨어 있습니다
             </h1>
             <p className="mt-5 text-sm leading-relaxed text-[var(--color-mystery-text)]/60">
-              다트를 던지기 전까지는
+              뛰어내리기 전까지는
               <br />
               아무도 알 수 없어요.
             </p>
@@ -54,10 +54,10 @@ export default function IntroScreen({ onStart, reducedMotion }: IntroScreenProps
           <motion.div
             aria-hidden
             className="mt-10"
-            animate={reducedMotion ? {} : { y: [0, -8, 0], rotate: [0, 6, 0] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+            animate={reducedMotion ? {} : { x: [-14, 14, -14], y: [0, -6, 0] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <DartShape size={40} />
+            <AirplaneShape size={44} />
           </motion.div>
         </div>
 

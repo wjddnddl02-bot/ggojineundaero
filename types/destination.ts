@@ -35,20 +35,20 @@ export interface Destination {
   regionId: RegionId;
 }
 
-export type AppPhase =
-  | "ready"
-  | "dragging"
-  | "flying"
-  | "landed"
-  | "revealing"
-  | "result";
+export type AppPhase = "ready" | "flying" | "landed" | "revealing" | "result";
 
 export interface ThrowResult {
   destination: Destination;
   travelRule: string;
   resultMessage: string;
-  /** normalized landing position of the pin within the map, 0 to 1 */
+  /** normalized landing position of the skydiver within the map, 0 to 1 */
   landingX: number;
   landingY: number;
   timestamp: number;
+}
+
+/** a point within the map, normalized 0 to 1 on each axis */
+export interface NormalizedLanding {
+  x: number;
+  y: number;
 }

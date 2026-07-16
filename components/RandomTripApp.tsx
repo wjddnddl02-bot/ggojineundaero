@@ -1,18 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import { motion, AnimatePresence, animate, useMotionValue } from "framer-motion";
 import KoreaMap from "@/components/KoreaMap";
-import ThrowablePin from "@/components/ThrowablePin";
+import SkyScene from "@/components/SkyScene";
 import IntroScreen from "@/components/IntroScreen";
-import IntroGuide from "@/components/IntroGuide";
 import ImpactEffect from "@/components/ImpactEffect";
 import RevealSequence from "@/components/RevealSequence";
 import ResultSheet from "@/components/ResultSheet";
 import { selectDestination } from "@/lib/selectDestination";
-import type { NormalizedLanding } from "@/lib/throwPhysics";
 import { getStoredResult, hasUsedReroll, setRerollUsed, setStoredResult } from "@/lib/storage";
-import { trackEvent, randomBetween } from "@/lib/utils";
+import { trackEvent } from "@/lib/utils";
 import { SERVICE_NAME } from "@/lib/constants";
 import type { AppPhase, Destination, ThrowResult } from "@/types/destination";
 
@@ -58,7 +56,7 @@ function SharedIntro({
         onClick={onStart}
         className="mt-6 min-h-11 rounded-full bg-[var(--color-accent)] px-8 py-4 text-lg font-bold text-white shadow-md active:scale-[0.98]"
       >
-        나도 다트 던지기
+        나도 뛰어내리기
       </button>
     </div>
   );
@@ -79,10 +77,14 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     () => Boolean(sharedDestination) || Boolean(getStoredResult())
   );
   const [sheetOpen, setSheetOpen] = useState(true);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [showThrowFail, setShowThrowFail] = useState(false);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+
+  const planeX = useMotionValue(0.5);
+  const planeY = useMotionValue(0.42);
+  const skyX = useMotionValue(0.5);
+  const skyY = useMotionValue(0.42);
+  const skyRotate = useMotionValue(0);
+  const skyScale = useMotionValue(0.55);
 
   useEffect(() => {
     trackEvent("page_view", { shared: Boolean(sharedDestination) });
@@ -105,27 +107,6 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     setViewMode("own");
   }, []);
 
-  const handleDragStart = useCallback(() => {
-    setHasInteracted(true);
-    setPhase("dragging");
-    trackEvent("pin_drag_start");
-  }, []);
-
-  const handleInvalidThrow = useCallback(() => {
-    setPhase("ready");
-    setShowThrowFail(true);
-    trackEvent("pin_throw_fail");
-    window.setTimeout(() => setShowThrowFail(false), 1600);
-  }, []);
-
-  const handleValidThrow = useCallback((aimed: NormalizedLanding) => {
-    const computed = selectDestination(aimed);
-    setResult(computed);
-    setPhase("flying");
-    trackEvent("pin_throw_success");
-    return { x: computed.landingX, y: computed.landingY };
-  }, []);
-
   const handleFlightComplete = useCallback(() => {
     setPhase("landed");
     if (typeof navigator !== "undefined") {
@@ -133,6 +114,38 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     }
     window.setTimeout(() => setPhase("revealing"), reducedMotion ? 150 : 550);
   }, [reducedMotion]);
+
+  const handleJumpClick = useCallback(() => {
+    if (phase !== "ready") return;
+
+    const aimed = { x: planeX.get(), y: planeY.get() };
+    const computed = selectDestination(aimed);
+    setResult(computed);
+    setPhase("flying");
+    trackEvent("jump_clicked");
+    if (typeof navigator !== "undefined") {
+      navigator.vibrate?.(20);
+    }
+
+    skyX.set(aimed.x);
+    skyY.set(aimed.y);
+    skyRotate.set(0);
+    skyScale.set(0.55);
+
+    const duration = reducedMotion ? 0.3 : 1.15;
+    Promise.all([
+      animate(skyX, computed.landingX, { duration, ease: "easeInOut" }),
+      animate(skyY, computed.landingY, { duration, ease: [0.3, 0, 0.7, 1] }),
+      animate(skyScale, 1, { duration, ease: "easeOut" }),
+      animate(
+        skyRotate,
+        reducedMotion ? 0 : [0, -10, 8, -5, 0],
+        { duration, ease: "easeInOut" }
+      ),
+    ]).then(() => {
+      handleFlightComplete();
+    });
+  }, [phase, reducedMotion, planeX, planeY, skyX, skyY, skyRotate, skyScale, handleFlightComplete]);
 
   const handleRevealComplete = useCallback(() => {
     setPhase("result");
@@ -153,23 +166,6 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     setPhase("ready");
   }, []);
 
-  const handleRandomDraw = useCallback(() => {
-    if (phase !== "ready") return;
-    const aimed: NormalizedLanding = {
-      x: randomBetween(0.1, 0.9),
-      y: randomBetween(0.1, 0.9),
-    };
-    const computed = selectDestination(aimed);
-    setResult(computed);
-    setHasInteracted(true);
-    setPhase("landed");
-    trackEvent("pin_throw_success", { via: "keyboard" });
-    if (typeof navigator !== "undefined") {
-      navigator.vibrate?.([30, 30, 50]);
-    }
-    window.setTimeout(() => setPhase("revealing"), reducedMotion ? 100 : 400);
-  }, [phase, reducedMotion]);
-
   if (viewMode === "shared" && sharedDestination) {
     return <SharedIntro destination={sharedDestination} onStart={handleStartOwn} />;
   }
@@ -180,7 +176,6 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
     );
   }
 
-  const isMapDimmed = phase === "dragging" || phase === "flying";
   const isRevealed = phase === "landed" || phase === "revealing" || phase === "result";
   const highlightedRegionId = isRevealed ? result?.destination.regionId ?? null : null;
   const highlightedCity = isRevealed ? result?.destination.city ?? null : null;
@@ -192,7 +187,7 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
           {SERVICE_NAME}
         </p>
         <AnimatePresence mode="wait">
-          {(phase === "ready" || phase === "dragging") && (
+          {phase === "ready" && (
             <motion.div
               key="copy"
               initial={{ opacity: 0 }}
@@ -206,24 +201,26 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
                 운명에 맡겨볼까요?
               </h1>
               <p className="mt-2 text-sm text-[var(--color-text)]/60">
-                다트를 잡고 대한민국 어딘가로 던져보세요.
+                비행기가 마음에 드는 곳을 지날 때 내려보세요.
               </p>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
-      <div className="relative mx-6 mt-2 flex flex-1 items-center justify-center">
-        <motion.div
-          ref={mapContainerRef}
-          className="relative aspect-[520/553] w-full max-w-[360px]"
-          animate={{
-            scale: isMapDimmed ? 0.92 : 1,
-            opacity: isMapDimmed ? 0.55 : 1,
-          }}
-          transition={{ duration: reducedMotion ? 0.1 : 0.4 }}
-        >
+      <div className="relative mx-6 mt-2 mb-6 flex flex-1 items-center justify-center">
+        <div className="relative aspect-[520/553] w-full max-w-[360px]">
           <KoreaMap highlightedRegionId={highlightedRegionId} highlightedCity={highlightedCity} />
+          <SkyScene
+            phase={phase}
+            reducedMotion={reducedMotion}
+            planeX={planeX}
+            planeY={planeY}
+            skyX={skyX}
+            skyY={skyY}
+            skyRotate={skyRotate}
+            skyScale={skyScale}
+          />
           {result && (
             <ImpactEffect
               x={result.landingX}
@@ -239,50 +236,20 @@ export default function RandomTripApp({ sharedDestination = null }: RandomTripAp
               onComplete={handleRevealComplete}
             />
           )}
-        </motion.div>
+        </div>
       </div>
 
-      <div
-        className="relative flex flex-col items-center pb-[calc(env(safe-area-inset-bottom)+18px)] pt-2"
-        onPointerDown={() => setHasInteracted(true)}
-      >
-        <AnimatePresence>
-          {showThrowFail && (
-            <motion.p
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="absolute -top-9 rounded-full bg-[var(--color-text)] px-4 py-1.5 text-xs font-semibold text-[var(--color-bg)]"
-              role="status"
-            >
-              조금 더 힘껏 위로 던져주세요!
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        <div className="relative">
-          <ThrowablePin
-            phase={phase}
-            mapContainerRef={mapContainerRef}
-            reducedMotion={reducedMotion}
-            onDragStart={handleDragStart}
-            onInvalidThrow={handleInvalidThrow}
-            onValidThrow={handleValidThrow}
-            onFlightComplete={handleFlightComplete}
-          />
-          <IntroGuide visible={phase === "ready" && !hasInteracted} reducedMotion={reducedMotion} />
-        </div>
-
-        {phase === "ready" && (
+      {phase === "ready" && (
+        <div className="flex justify-center pb-[calc(env(safe-area-inset-bottom)+18px)]">
           <button
             type="button"
-            onClick={handleRandomDraw}
-            className="mt-24 min-h-11 px-3 text-xs text-[var(--color-text)]/45 underline underline-offset-4"
+            onClick={handleJumpClick}
+            className="min-h-11 min-w-[220px] rounded-full bg-[var(--color-accent)] px-8 py-4 text-base font-bold text-white shadow-md active:scale-[0.98]"
           >
-            직접 던지기 어려우신가요? 랜덤으로 뽑기
+            여기서 내리기
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {phase === "result" && result && sheetOpen && (

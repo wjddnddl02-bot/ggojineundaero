@@ -3,8 +3,7 @@ import { getDestinationsByRegion } from "@/data/destinations";
 import { travelRules } from "@/data/travelRules";
 import { resultMessages } from "@/data/resultMessages";
 import { clamp, pickRandom, randomBetween } from "@/lib/utils";
-import type { NormalizedLanding } from "@/lib/throwPhysics";
-import type { ThrowResult } from "@/types/destination";
+import type { NormalizedLanding, ThrowResult } from "@/types/destination";
 
 const LANDING_JITTER = 0.035;
 
